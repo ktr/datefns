@@ -27,6 +27,13 @@ def week_ending(date, week_ends_on='Sat'):
         'Sa' : 'Sat',
         'Sun' : 'Sun',
         'Su' : 'Sun',
+        'Sunday' : 'Sun',
+        'Monday' : 'Mon',
+        'Tuesday' : 'Tue',
+        'Wednesday' : 'Wed',
+        'Thursday' : 'Thu',
+        'Friday' : 'Fri',
+        'Saturday' : 'Sat',
     }
     if week_ends_on not in days:
         raise BadDay("Cannot understand '%s' for week_ends_on argument" % week_ends_on)
