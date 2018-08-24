@@ -2,6 +2,7 @@
 Various utilities for dates.
 """
 
+from collections import namedtuple
 import datetime
 from datetime import timedelta
 from calendar import month_name, monthrange, day_name
@@ -141,6 +142,34 @@ def date_table(start_date: datetime.date, end_date: datetime.date):
         - business_days_in_month (eg, 22)
     """
     assert end_date >= start_date, "end_date must be after start_date"
+    DateRow = namedtuple('DateRow', [
+        'date_id',
+        'date_int',
+        'date',
+        'year',
+        'quarter_int',
+        'quarter',
+        'month_int',
+        'month',
+        'month_end',
+        'day_of_month',
+        'week_ending',
+        'day_of_week_int',
+        'day_of_week',
+        'year_month',
+        'holiday',
+        'is_weekday',
+        'is_holiday',
+        'is_workday',
+        'num_weekdays',
+        'num_holidays',
+        'num_workdays',
+        'week_num',
+        'week_num_of_year',
+        'weeks_remaining_in_year',
+        'business_day_of_month',
+        'business_days_in_month',
+    ])
     date = datetime.date(start_date.year, start_date.month, 1)
     dates = [] # type: ignore
     bus_days_in_month = {} # type: Dict[str, int]
@@ -156,7 +185,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date):
         if date < start_date:
             date += timedelta(days=1)
             continue
-        dates.append([
+        dates.append(DateRow(
             len(dates),
             int(date.strftime('%Y%m%d')),
             date,
@@ -183,6 +212,6 @@ def date_table(start_date: datetime.date, end_date: datetime.date):
             None,
             bus_day_of_mo,
             bus_days_in_month[date.strftime("%Y%m")],
-        ])
+        ))
         date += timedelta(days=1)
     return dates
