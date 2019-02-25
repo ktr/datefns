@@ -113,5 +113,38 @@ class TestWeekEndingFn(unittest.TestCase):
             self.assertEqual(expected[pos], datefns.week_ending(d1, day))
 
 
+class TestHolidayFn(unittest.TestCase):
+
+    def test_new_years(self):
+        self.assertEqual("New Year's", datefns.holiday_name(date(2018, 1, 1)))
+
+    def test_day_after_new_years(self):
+        self.assertIsNone(datefns.holiday_name(date(2018, 1, 2)))
+
+    def test_mlk_day(self):
+        self.assertEqual("Martin Luther King", datefns.holiday_name(date(2018, 1, 15)))
+        # date(2018, 2, 19), date(2018, 2, 20), date(2018, 5, 21),
+        # date(2018, 5, 28), date(2018, 5, 29), date(2018, 5, 31),
+        # date(2018, 7, 4), date(2018, 9, 3), date(2018, 9, 10),
+        # date(2018, 11, 22), date(2018, 11, 23), date(2018, 11, 29),
+        # date(2018, 11, 30), date(2018, 12, 24), date(2018, 12, 25),
+        # date(2018, 12, 31)]
+
+    def test_thanksgiving_day(self):
+        self.assertEqual("Thanksgiving", datefns.holiday_name(date(2018, 11, 22)))
+
+    def test_day_after_thanksgiving_day(self):
+        self.assertEqual("Day After Thanksgiving", datefns.holiday_name(date(2018, 11, 23)))
+
+    def test_thanksgiving_day_on_fri_first_day(self):
+        self.assertEqual("Thanksgiving", datefns.holiday_name(date(2019, 11, 28)))
+
+    def test_day_after_thanksgiving_day_on_fri_first_day_good(self):
+        self.assertEqual("Day After Thanksgiving", datefns.holiday_name(date(2019, 11, 29)))
+
+    def test_day_after_thanksgiving_day_on_fri_first_day_bad(self):
+        self.assertIsNone("Day After Thanksgiving", datefns.holiday_name(date(2019, 11, 22)))
+
+
 if __name__ == '__main__':
     unittest.main()
