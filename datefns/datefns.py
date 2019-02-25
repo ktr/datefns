@@ -6,7 +6,10 @@ from collections import namedtuple
 import datetime
 from datetime import timedelta
 from calendar import month_name, monthrange, day_name
-from typing import Dict
+import sqlite3
+from typing import Dict, Optional
+
+__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name']
 
 class DatefnError(Exception):
     pass
@@ -14,7 +17,7 @@ class DatefnError(Exception):
 class BadDay(DatefnError):
     pass
 
-def week_ending(date, week_ends_on='Sat'):
+def week_ending(date: datetime.date, week_ends_on: Optional[str] = 'Sat') -> datetime.date:
     "Return the date of"
     days = {
         'Mon' : 'Mon',
@@ -58,8 +61,9 @@ def week_ending(date, week_ends_on='Sat'):
 
 def holiday_name(date: datetime.date, special_holidays: dict = None):
     "Return the holiday name (if any) for the date provided"
-    if date in (special_holidays or {}):
-        return special_holidays[date]
+    holidays = special_holidays or {}
+    if date in holidays:
+        return holidays[date]
 
     first_weekday_of_month = monthrange(date.year, date.month)[0]
     if date.weekday() >= first_weekday_of_month:
@@ -84,6 +88,7 @@ def holiday_name(date: datetime.date, special_holidays: dict = None):
         return 'Labor Day'
     if date.month == 11 and day_of_week == 'Thursday' and nth_day_of_month == 4:
         return 'Thanksgiving'
+    # BUG! Won't be right when month starts on Friday
     if date.month == 11 and day_of_week == 'Friday' and nth_day_of_month == 4:
         return 'Day After Thanksgiving'
     if date.month == 12 and date.day == 24:
@@ -106,7 +111,7 @@ def num_business_days_in_month(date: datetime.date, special_holidays: dict = Non
     return num_bus_days
 
 
-def date_table(start_date: datetime.date, end_date: datetime.date):
+def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
     """
     Create a dates table for use in data warehouse environment
     
