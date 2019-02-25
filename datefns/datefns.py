@@ -126,7 +126,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
         - quarter_int (eg, 3)
         - quarter (eg, Q3)
         - month_int (eg, 4)
-        - month (eg, April)
+        - month_name (eg, April)
         - month_end (eg, 2018-04-30)
         - day_of_month (eg, 27)
         - week_ending (eg, 2018-07-28) - note, weeks end on a saturday
@@ -155,7 +155,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
         'quarter_int',
         'quarter',
         'month_int',
-        'month',
+        'month_name',
         'month_end',
         'day_of_month',
         'week_ending',
@@ -220,3 +220,56 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
         ))
         date += timedelta(days=1)
     return dates
+
+
+def date_table_create_sql(ignore_if_exists: Optional[bool] = True) -> str:
+    "Return SQL that can be used to 'create table' for data returned from 'date_table'"
+    return '''
+Create Table {}dates (
+    date_id Integer Not Null Primary Key
+  , date_int Integer Not Null Unique
+  , date Date Not Null
+  , year Integer Not Null
+  , quarter_int Integer Not Null
+  , quarter Char(2) Not Null
+  , month_int Integer Not Null
+  , month_name Varchar(20) Not Null
+  , month_end Date Not Null
+  , day_of_month Integer Not Null
+  , week_ending Date Not Null
+  , day_of_week_int Integer Not Null
+  , day_of_week Varchar(10) Not Null
+  , year_month Integer Not Null
+  , holiday Varchar(30)
+  , is_weekday Varchar(3) Not Null
+  , is_holiday Varchar(3)
+  , is_workday Varchar(3)
+  , num_weekdays Boolean Not Null
+  , num_holidays Boolean
+  , num_workdays Boolean
+  , week_num Integer Not Null
+  , week_num_of_year Varchar(5)
+  , weeks_remaining_in_year Integer
+  , workday_day_of_month Integer
+  , workdays_in_month Integer
+)
+'''.format("If Not Exists " if ignore_if_exists else "")
+
+
+def date_table_insert_sql() -> str:
+    return '''
+Insert Into dates Values (
+    ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
+  , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
+  , ? , ? , ? , ? , ? , ?
+)
+'''
+
+
+def load_date_table(conn: sqlite3.Connection, start_date: datetime.date, end_date: datetime.date) -> bool:
+    "Create date table and load it with data"
+    curs = conn.cursor()
+    curs.execute(date_table_create_sql())
+    curs.executemany(date_table_insert_sql(), date_table(start_date, end_date))
+    conn.commit()
+    return True
