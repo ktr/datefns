@@ -143,7 +143,7 @@ class TestHolidayFn(unittest.TestCase):
         self.assertEqual("Day After Thanksgiving", datefns.holiday_name(date(2019, 11, 29)))
 
     def test_day_after_thanksgiving_day_on_fri_first_day_bad(self):
-        self.assertIsNone("Day After Thanksgiving", datefns.holiday_name(date(2019, 11, 22)))
+        self.assertIsNone(datefns.holiday_name(date(2019, 11, 22)))
 
 
 if __name__ == '__main__':

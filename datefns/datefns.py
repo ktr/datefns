@@ -88,9 +88,12 @@ def holiday_name(date: datetime.date, special_holidays: dict = None):
         return 'Labor Day'
     if date.month == 11 and day_of_week == 'Thursday' and nth_day_of_month == 4:
         return 'Thanksgiving'
-    # BUG! Won't be right when month starts on Friday
-    if date.month == 11 and day_of_week == 'Friday' and nth_day_of_month == 4:
-        return 'Day After Thanksgiving'
+    if date.month == 11 and day_of_week == 'Friday':
+        first_day_of_month = day_name[datetime.date(date.year, date.month, 1).weekday()]
+        if first_day_of_month == 'Friday' and nth_day_of_month == 5:
+            return 'Day After Thanksgiving'
+        elif first_day_of_month != 'Friday' and nth_day_of_month == 4:
+            return 'Day After Thanksgiving'
     if date.month == 12 and date.day == 24:
         return 'Christmas Eve'
     if date.month == 12 and date.day == 25:
