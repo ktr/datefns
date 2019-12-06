@@ -3,13 +3,15 @@ Various utilities for dates.
 """
 
 from collections import namedtuple
+import csv
 import datetime
 from datetime import timedelta
 from calendar import month_name, monthrange, day_name
+from pathlib import Path
 import sqlite3
-from typing import Dict, Optional
+from typing import Dict, List, NamedTuple, Optional
 
-__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name']
+__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth']
 
 class DatefnError(Exception):
     pass
@@ -114,7 +116,7 @@ def num_business_days_in_month(date: datetime.date, special_holidays: dict = Non
     return num_bus_days
 
 
-def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
+def date_table(start_date: datetime.date, end_date: datetime.date) -> List[NamedTuple]:
     """
     Create a dates table for use in data warehouse environment
     
@@ -165,6 +167,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
         'day_of_week_int',
         'day_of_week',
         'year_month',
+        'year_quarter',
         'holiday',
         'is_weekday',
         'is_holiday',
@@ -208,6 +211,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> list:
             (date.weekday() + 1) % 7, # default function has Monday = 0, Sunday = 6
             date.strftime("%A"),
             int(date.strftime("%Y%m")),
+            date.strftime("%Y") + ('Q%d' % qtr),
             holiday,
             'Yes' if date.weekday() < 5 else 'No', # is weekday?
             'Yes' if holiday else 'No', # is holiday?
@@ -243,6 +247,7 @@ Create Table {}dates (
   , day_of_week_int Integer Not Null
   , day_of_week Varchar(10) Not Null
   , year_month Integer Not Null
+  , year_quarter Char(6) Not Null
   , holiday Varchar(30)
   , is_weekday Varchar(3) Not Null
   , is_holiday Varchar(3)
@@ -264,7 +269,7 @@ def date_table_insert_sql() -> str:
 Insert Into dates Values (
     ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
   , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
-  , ? , ? , ? , ? , ? , ?
+  , ? , ? , ? , ? , ? , ?, ?
 )
 '''
 
@@ -276,3 +281,25 @@ def load_date_table(conn: sqlite3.Connection, start_date: datetime.date, end_dat
     curs.executemany(date_table_insert_sql(), date_table(start_date, end_date))
     conn.commit()
     return True
+
+
+def date_table_to_csv(date_table: List[NamedTuple], path: Path, overwrite: bool = False):
+    if isinstance(path, str):
+        path = Path(path)
+    if path.exists():
+        if overwrite is False:
+            raise FileExistsError(f"Can't overwrite {path}. Delete and try again.")
+    with path.open('w', encoding='utf8', newline='') as io:
+        writer = csv.writer(io)
+        writer.writerow(date_table[0]._fields)
+        writer.writerows(date_table)
+
+def eomonth(date: datetime.date, num_months: int = 1) -> datetime.date:
+    years = num_months // 12
+    months = num_months % 12
+    y = date.year + years
+    m = (date.month + months - 1) % 12 + 1
+    if m < date.month:
+        y += 1
+    d = monthrange(y, m)[1]
+    return datetime.date(y, m, d)
