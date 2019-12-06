@@ -20,7 +20,13 @@ memory by doing the following::
 
     import datefns, datetime
     d1 = datetime.date(2018, 7, 10)
+    d2 = datetime.date(2018, 12, 31)
     we = datefns.week_ending(d1, week_ends_on='Sun')
+    ds = datefns.date_table(d1, d2)
+
+    import sqlite3
+    conn = sqlite3.connect(':memory:')
+    datefns.load_date_table(conn, start_date=d1, end_date=d2)
 
 Running Tests
 =============
