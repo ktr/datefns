@@ -145,6 +145,12 @@ class TestHolidayFn(unittest.TestCase):
     def test_day_after_thanksgiving_day_on_fri_first_day_bad(self):
         self.assertIsNone(datefns.holiday_name(date(2019, 11, 22)))
 
+    def test_jul32019(self):
+        self.assertIsNone(datefns.holiday_name(date(2019, 7, 3)))
+
+    def test_jul42019(self):
+        self.assertEqual("4th of July", datefns.holiday_name(date(2019, 7, 4)))
+
 
 if __name__ == '__main__':
     unittest.main()

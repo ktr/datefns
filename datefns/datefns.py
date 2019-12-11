@@ -84,7 +84,7 @@ def holiday_name(date: datetime.date, special_holidays: dict = None):
         return "President's Day"
     if date.month == 5 and day_of_week == 'Monday' and (date + timedelta(days=7)).month != date.month:
         return 'Memorial Day'
-    if date.month == 7 and date.day == 3:
+    if date.month == 7 and date.day == 4:
         return '4th of July'
     if date.month == 9 and day_of_week == 'Monday' and nth_day_of_month == 1:
         return 'Labor Day'
