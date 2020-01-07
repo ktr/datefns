@@ -232,7 +232,7 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> List[Named
 def date_table_create_sql(ignore_if_exists: Optional[bool] = True) -> str:
     "Return SQL that can be used to 'create table' for data returned from 'date_table'"
     return '''
-Create Table {}dates (
+Create Table If Not Exists {}dates (
     date_id Integer Not Null Primary Key
   , date_int Integer Not Null Unique
   , date Date Not Null
