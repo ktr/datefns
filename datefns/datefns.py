@@ -11,7 +11,7 @@ from pathlib import Path
 import sqlite3
 from typing import Dict, List, NamedTuple, Optional
 
-__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth']
+__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth', 'date_table_insert_sql']
 
 class DatefnError(Exception):
     pass
@@ -150,8 +150,13 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> List[Named
         - weeks_remaining_in_year (eg, 52 if on week one in week with 53 weeks)
         - business_day_of_month (eg, 20)
         - business_days_in_month (eg, 22)
+        - workday_number_of_year
+        - day_number_of_year
+        - is_last_day_of_week
+        - is_last_day_of_month
     """
     assert end_date >= start_date, "end_date must be after start_date"
+    assert start_date.month == 1 and start_date.day == 1, "Currently need to start on Jan 1 or metrics won't work correctly"
     DateRow = namedtuple('DateRow', [
         'date_id',
         'date_int',
@@ -180,22 +185,34 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> List[Named
         'weeks_remaining_in_year',
         'business_day_of_month',
         'business_days_in_month',
+        'business_day_of_year',
+        'day_number_of_year',
+        'is_last_day_of_week',
+        'is_last_day_of_month',
     ])
     date = datetime.date(start_date.year, start_date.month, 1)
     dates = [] # type: ignore
     bus_days_in_month = {} # type: Dict[str, int]
     bus_day_of_mo = 0
+    day_of_year = 0
+    bus_day_of_year = 0
     while date <= end_date:
         qtr = (date.month - 1) // 3 + 1
         holiday = holiday_name(date)
         if date.day == 1:
             bus_day_of_mo = 0
             bus_days_in_month[date.strftime("%Y%m")] = num_business_days_in_month(date)
+            if date.month == 1:
+                bus_day_of_year = 0
+                day_of_year = 0
         if holiday is None and date.weekday() < 5:
+            # is a workday
             bus_day_of_mo += 1
+            bus_day_of_year += 1
         if date < start_date:
             date += timedelta(days=1)
             continue
+        day_of_year += 1
         dates.append(DateRow(
             len(dates),
             int(date.strftime('%Y%m%d')),
@@ -224,6 +241,10 @@ def date_table(start_date: datetime.date, end_date: datetime.date) -> List[Named
             None,
             bus_day_of_mo,
             bus_days_in_month[date.strftime("%Y%m")],
+            bus_day_of_year, # business day number of year
+            day_of_year, # day number of year
+            'Yes' if week_ending(date, week_ends_on='Saturday') == date else 'No', # is last day of week?
+            'Yes' if datetime.date(date.year, date.month, monthrange(date.year, date.month)[1]) == date else 'No', # is last day of month?
         ))
         date += timedelta(days=1)
     return dates
@@ -260,6 +281,10 @@ Create Table {}dates (
   , weeks_remaining_in_year Integer
   , workday_day_of_month Integer
   , workdays_in_month Integer
+  , workday_number_of_year Integer Not Null
+  , day_number_of_year Integer Not Null
+  , is_last_day_of_week Boolean Not Null
+  , is_last_day_of_month Boolean Not Null
 )
 '''.format("If Not Exists " if ignore_if_exists else "")
 
@@ -269,7 +294,8 @@ def date_table_insert_sql() -> str:
 Insert Into dates Values (
     ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
   , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
-  , ? , ? , ? , ? , ? , ?, ?
+  , ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
+  , ?
 )
 '''
 
@@ -293,6 +319,7 @@ def date_table_to_csv(date_table: List[NamedTuple], path: Path, overwrite: bool 
         writer = csv.writer(io)
         writer.writerow(date_table[0]._fields)
         writer.writerows(date_table)
+
 
 def eomonth(date: datetime.date, num_months: int = 1) -> datetime.date:
     years = num_months // 12
