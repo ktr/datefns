@@ -15,6 +15,13 @@ There are no dependancies to install. You just need to::
 
     pip install datefns
 
+or::
+
+    git clone git@github.com:ktr/datefns.git
+    cd datefns
+    python setup.py install
+
+
 Once installed, you can iterate through the entire file without using much
 memory by doing the following::
 
