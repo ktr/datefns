@@ -11,7 +11,7 @@ from pathlib import Path
 import sqlite3
 from typing import Dict, List, NamedTuple, Optional
 
-__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth', 'date_table_insert_sql']
+__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth', 'date_table_insert_sql', 'date_range', 'by_month']
 
 class DatefnError(Exception):
     pass
@@ -330,3 +330,16 @@ def eomonth(date: datetime.date, num_months: int = 1) -> datetime.date:
         y += 1
     d = monthrange(y, m)[1]
     return datetime.date(y, m, d)
+
+
+def date_range(fr: datetime.date, to: datetime.date, by = lambda d: d + datetime.timedelta(days=1)) -> List[datetime.date]:
+    ds = [fr]
+    nxt = by(fr)
+    while nxt <= to:
+        ds.append(nxt)
+        nxt = by(nxt)
+    return ds
+
+
+def by_month(d: datetime.date):
+    return eomonth(d, 1)
