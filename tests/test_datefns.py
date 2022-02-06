@@ -5,6 +5,7 @@ test_datefns.py - test datefns library
 from datetime import date
 import os
 import unittest
+import sqlite3
 
 from .context import datefns
 
@@ -150,6 +151,15 @@ class TestHolidayFn(unittest.TestCase):
 
     def test_jul42019(self):
         self.assertEqual("4th of July", datefns.holiday_name(date(2019, 7, 4)))
+
+
+class TestTimeFns(unittest.TestCase):
+
+    def test_insert_2xs(self):
+        conn = sqlite3.connect(':memory:')
+        ts = datefns.time_table()
+        datefns.load_time_table(conn, ts)
+        datefns.load_time_table(conn, ts)
 
 
 if __name__ == '__main__':

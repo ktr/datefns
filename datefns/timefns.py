@@ -13,7 +13,7 @@ __all__ = [
 
 
 CREATE_SQL = '''
-Create Table time If Not Exists (
+Create Table If Not Exists time (
     time_key Integer Not Null Primary Key
   , time_24hr Time Not Null Unique
   , hour12 Integer Not Null
@@ -50,7 +50,7 @@ Insert Into time (
   , meridiem
 ) Values (
     ? , ? , ? , ? , ? , ? , ? , ? , ? , ?
-)
+) On Conflict Do Nothing
 '''
 
 def time_table_insert_sql():

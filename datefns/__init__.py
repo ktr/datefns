@@ -2,4 +2,4 @@
 from .datefns import *
 from .timefns import *
 
-__version__ = '0.0.1a6'
+__version__ = '0.0.1a8'
