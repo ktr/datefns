@@ -310,11 +310,11 @@ Insert Into dates Values (
 '''
 
 
-def load_date_table(conn: sqlite3.Connection, start_date: datetime.date, end_date: datetime.date) -> bool:
+def load_date_table(conn: sqlite3.Connection, date_table) -> bool:
     "Create date table and load it with data"
     curs = conn.cursor()
     curs.execute(date_table_create_sql())
-    curs.executemany(date_table_insert_sql(), date_table(start_date, end_date))
+    curs.executemany(date_table_insert_sql(), date_table)
     conn.commit()
     return True
 

@@ -32,11 +32,15 @@ memory by doing the following::
     ds = datefns.date_table(d1, d2)
     me = datefns.eomonth(d1, 5) # datetime.date(2018, 12, 31)
 
-    datefns.date_table_to_csv(ds, '/path/to/file.csv', overwrite=True)
+    ts = datefns.time_table()
+
+    datefns.date_table_to_csv(ds, '/path/to/date-file.csv', overwrite=True)
+    datefns.time_table_to_csv(ts, '/path/to/time-file.csv', overwrite=True)
 
     import sqlite3
     conn = sqlite3.connect(':memory:')
-    datefns.load_date_table(conn, start_date=d1, end_date=d2)
+    datefns.load_date_table(conn, datefns.date_table(start_date=d1, end_date=d2))
+    datefns.load_time_table(conn, ts)
 
     ds = datefns.date_range(d1, d2, datefns.by_month)
 
