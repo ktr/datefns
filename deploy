@@ -2,7 +2,7 @@
 
 # make sure you have wheel and twine installed (via pip)
 
-VERSION="0.0.1a3"
+VERSION="0.0.1a5"
 
 python setup.py sdist
 python setup.py bdist_wheel

@@ -13,7 +13,7 @@ def get_long_desc():
 
 
 setup(name='datefns',
-      version='0.0.1a3',
+      version='0.0.1a5',
       description='A module providing some useful date functions',
       url='https://github.com/ktr/datefns',
       author='Kevin Ryan',

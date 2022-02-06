@@ -1,14 +1,13 @@
 
 import csv
-import datefns
-import datetime
 import logging
 import os
+import sqlite3
 
 __all__ = [
     'time_table',
     'time_table_to_csv',
-    'time_table_insert_sql'
+    'time_table_insert_sql',
     'load_time_table',
 ]
 
