@@ -11,7 +11,17 @@ from pathlib import Path
 import sqlite3
 from typing import Dict, List, NamedTuple, Optional
 
-__all__ = ['week_ending', 'date_table', 'load_date_table', 'holiday_name', 'date_table_to_csv', 'eomonth', 'date_table_insert_sql', 'date_range', 'by_month']
+__all__ = [
+    'week_ending',
+    'date_table',
+    'load_date_table',
+    'holiday_name',
+    'date_table_to_csv',
+    'eomonth',
+    'date_table_insert_sql',
+    'date_range',
+    'by_month',
+]
 
 class DatefnError(Exception):
     pass

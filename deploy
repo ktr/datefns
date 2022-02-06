@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# make sure you have wheel and twine installed (via pip)
+
+VERSION="0.0.1a3"
+
+python setup.py sdist
+python setup.py bdist_wheel
+
+# python3 -m twine upload --repository-url https://test.pypi.org/legacy/ 
+python3 -m twine upload dist/datefns-"$VERSION"-py3-none-any.whl
+python3 -m twine upload dist/datefns-"$VERSION".tar.gz
